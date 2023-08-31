@@ -1849,6 +1849,563 @@ declare class sqlite3_index_info extends SQLiteStruct {
   constructor(pointer?: WasmPointer);
 }
 
+declare class Fts5ExtensionApi extends SQLiteStruct {
+  $iVersion: number;
+
+  constructor(pointer?: WasmPointer);
+
+  /**
+   * Return a copy of the context pointer the extension function was registered
+   * with. Function pointe resolves to:
+   *
+   *     $xUserData: (fts5Ctx: WasmPointer) => WasmPointer;
+   */
+  $xUserData: WasmPointer;
+
+  /**
+   * Return the number of columns in the table. Function pointe resolves to:
+   *
+   *     $xColumnCount: (fts5Ctx: WasmPointer) => number;
+   */
+  $xColumnCount: WasmPointer;
+
+  /**
+   * This function is used to retrieve the total number of rows in the table. In
+   * other words, the same value that would be returned by:
+   *
+   *     SELECT count(*) FROM ftstable;
+   *
+   * Function pointer resolves to:
+   *
+   *     $xRowCount: (fts5Ctx: WasmPointer) => number;
+   */
+  $xRowCount: WasmPointer;
+
+  /**
+   * If parameter `iCol` is less than zero, set output variable `*pnToken` to
+   * the total number of tokens in the FTS5 table. Or, if `iCol` is non-negative
+   * but less than the number of columns in the table, return the total number
+   * of tokens in column `iCol`, considering all rows in the FTS5 table.
+   *
+   * If parameter `iCol` is greater than or equal to the number of columns in
+   * the table, `SQLITE_RANGE` is returned. Or, if an error occurs (e.g. an OOM
+   * condition or IO error), an appropriate SQLite error code is returned.
+   *
+   * Function pointer resolves to:
+   *
+   *     $xColumnTotalSize: (
+   *       fts5Ctx: WasmPointer,
+   *       iCol: number,
+   *       pnRow: WasmPointer,
+   *     ) => number;
+   */
+  $xColumnTotalSize: WasmPointer;
+
+  /**
+   * Tokenize text using the tokenizer belonging to the FTS5 table.
+   *
+   * Function pointer resolves to:
+   *
+   *     $xTokenize: (
+   *       fts5Ctx: WasmPointer,
+   *       pText: WasmPointer,
+   *       nText: number,
+   *       pCtx: WasmPointer,
+   *       tokenCallback: (
+   *         pCtx: WasmPointer,
+   *         tflags: number,
+   *         token: string,
+   *         nToken: number,
+   *         iStart: number,
+   *         iEnd: number,
+   *       ) => number,
+   *     ) => number;
+   */
+  $xTokenize: WasmPointer;
+
+  /**
+   * Returns the number of phrases in the current query expression. Function
+   * pointer resolves to:
+   *
+   *     $xPhraseCount: (fts5Ctx: WasmPointer) => number;
+   */
+  $xPhraseCount: WasmPointer;
+
+  /**
+   * Returns the number of tokens in phrase `iPhrase` of the query. Phrases are
+   * numbered starting from zero.
+   *
+   * Function pointer resolves to:
+   *
+   *     $xPhraseSize: (fts5Ctx: WasmPointer, iPhrase: number) => number;
+   */
+  $xPhraseSize: WasmPointer;
+
+  /**
+   * Set `*pnInst` to the total number of occurrences of all phrases within the
+   * query within the current row. Return `SQLITE_OK` if successful, or an error
+   * code (i.e. `SQLITE_NOMEM`) if an error occurs.
+   *
+   * This API can be quite slow if used with an FTS5 table created with the
+   * `"detail=none"` or `"detail=column"` option. If the FTS5 table is created
+   * with either `"detail=none"` or `"detail=column"` and `"content="` option
+   * (i.e. if it is a contentless table), then this API always returns 0.
+   * Function pointer resolves to:
+   *
+   *     $xInstCount: (fts5Ctx: WasmPointer, pnInst: WasmPointer) => number;
+   */
+  $xInstCount: WasmPointer;
+
+  /**
+   * Query for the details of phrase match `iIdx` within the current row. Phrase
+   * matches are numbered starting from zero, so the `iIdx` argument should be
+   * greater than or equal to zero and smaller than the value output by
+   * `xInstCount()`.
+   *
+   * Usually, output parameter `*piPhrase` is set to the phrase number, `*piCol`
+   * to the column in which it occurs and `*piOff` the token offset of the first
+   * token of the phrase. Returns `SQLITE_OK` if successful, or an error code
+   * (i.e. `SQLITE_NOMEM`) if an error occurs.
+   *
+   * This API can be quite slow if used with an FTS5 table created with the
+   * `"detail=none"` or `"detail=column"` option.
+   *
+   * Function resolves to:
+   *
+   *     $xInst: (
+   *       fts5Ctx: WasmPointer,
+   *       iIdx: number,
+   *       piPhrase: WasmPointer,
+   *       piCol: WasmPointer,
+   *       piOff: WasmPointer,
+   *     ) => number;
+   */
+  $xInst: WasmPointer;
+
+  /**
+   * Returns the rowid of the current row. Function pointer resolves to:
+   *
+   *     $xRowid: (fts5Ctx: WasmPointer) => BigInt;
+   */
+  $xRowid: WasmPointer;
+
+  /**
+   * This function attempts to retrieve the text of column `iCol` of the current
+   * document. If successful, `(*pz)` is set to point to a buffer containing the
+   * text in utf-8 encoding, `(*pn)` is set to the size in bytes (not
+   * characters) of the buffer and `SQLITE_OK` is returned. Otherwise, if an
+   * error occurs, an SQLite error code is returned and the final values of
+   * `(*pz)` and `(*pn)` are undefined.
+   *
+   * Function pointer resolves to:
+   *
+   *     $xColumnText: (
+   *       fts5Ctx: WasmPointer,
+   *       iCol: number,
+   *       pz: WasmPointer,
+   *       pn: WasmPointer,
+   *     ) => number;
+   */
+  $xColumnText: WasmPointer;
+
+  /**
+   * If parameter `iCol` is less than zero, set output variable `*pnToken` to
+   * the total number of tokens in the current row. Or, if `iCol` is
+   * non-negative but less than the number of columns in the table, set
+   * `*pnToken` to the number of tokens in column `iCol` of the current row.
+   *
+   * If parameter `iCol` is greater than or equal to the number of columns in
+   * the table, `SQLITE_RANGE` is returned. Or, if an error occurs (e.g. an OOM
+   * condition or IO error), an appropriate SQLite error code is returned.
+   *
+   * This function may be quite inefficient if used with an FTS5 table created
+   * with the `"columnsize=0"` option.
+   *
+   * Function pointer resolves to:
+   *
+   *     $xColumnSize: (
+   *       fts5Ctx: WasmPointer,
+   *       iCol: number,
+   *       pnToken: WasmPointer,
+   *     ) => number;
+   */
+  $xColumnSize: WasmPointer;
+
+  /**
+   * This API function is used to query the FTS table for phrase iPhrase of the
+   * current query. Specifically, a query equivalent to:
+   *
+   *     ... FROM ftstable WHERE ftstable MATCH $p ORDER BY rowid
+   *
+   * With `$p` set to a phrase equivalent to the phrase `iPhrase` of the current
+   * query is executed. Any column filter that applies to phrase `iPhrase` of
+   * the current query is included in `$p`. For each row visited, the `callback`
+   * function passed as the fourth argument is invoked. The context and API
+   * objects passed to the callback function may be used to access the
+   * properties of each matched row. Invoking `Api.xUserData()` returns a copy
+   * of the pointer passed as the third argument to pUserData.
+   *
+   * If the callback function returns any value other than `SQLITE_OK`, the
+   * query is abandoned and the `xQueryPhrase` function returns immediately. If
+   * the returned value is `SQLITE_DONE`, `xQueryPhrase` returns `SQLITE_OK`.
+   * Otherwise, the error code is propagated upwards.
+   *
+   * If the query runs to completion without incident, `SQLITE_OK` is returned.
+   * Or, if some error occurs before the query completes or is aborted by the
+   * callback, an SQLite error code is returned.
+   *
+   * Function pointer resolves to:
+   *
+   *     $xQueryPhrase: (
+   *       fts5Ctx: WasmPointer,
+   *       iPhrase: number,
+   *       pUserData: WasmPointer,
+   *       callback: (
+   *         fts5Api: WasmPointer,
+   *         fts5Ctx: WasmPointer,
+   *         pUserData: WasmPointer,
+   *       ) => number,
+   *     ) => number;
+   */
+  $xQueryPhrase: WasmPointer;
+
+  /**
+   * Save the pointer passed as the second argument as the extension function's
+   * "auxiliary data". The pointer may then be retrieved by the current or any
+   * future invocation of the same fts5 extension function made as part of the
+   * same `MATCH` query using the `xGetAuxdata()` API.
+   *
+   * Each extension function is allocated a single auxiliary data slot for each
+   * FTS query (`MATCH` expression). If the extension function is invoked more
+   * than once for a single FTS query, then all invocations share a single
+   * auxiliary data context.
+   *
+   * If there is already an auxiliary data pointer when this function is
+   * invoked, then it is replaced by the new pointer. If an `xDelete` callback
+   * was specified along with the original pointer, it is invoked at this
+   * point.
+   *
+   * The `xDelete` callback, if one is specified, is also invoked on the
+   * auxiliary data pointer after the FTS5 query has finished.
+   *
+   * If an error (e.g. an OOM condition) occurs within this function, the
+   * auxiliary data is set to `NULL` and an error code returned. If the
+   * `xDelete` parameter was not `NULL`, it is invoked on the auxiliary data
+   * pointer before returning.
+   *
+   * Function pointer resolves to:
+   *
+   *     $xSetAuxdata: (
+   *       fts5Ctx: WasmPointer,
+   *       pAux: WasmPointer,
+   *       xDelete: (pAux: WasmPointer) => void,
+   *     ) => number;
+   */
+  $xSetAuxdata: WasmPointer;
+
+  /**
+   * Returns the current auxiliary data pointer for the fts5 extension function.
+   * See the `xSetAuxdata()` method for details.
+   *
+   * If the `bClear` argument is non-zero, then the auxiliary data is cleared
+   * (set to `NULL`) before this function returns. In this case the `xDelete`,
+   * if any, is not invoked.
+   *
+   * Function pointer resolves to:
+   *
+   *     $xGetAuxdata: (fts5Ctx: WasmPointer, bClear: number) => WasmPointer;
+   */
+  $xGetAuxdata: WasmPointer;
+
+  /**
+   * This function is used, along with type `Fts5PhraseIter` and the
+   * `xPhraseNext` method, to iterate through all instances of a single query
+   * phrase within the current row. This is the same information as is
+   * accessible via the `xInstCount`/`xInst` APIs. While the
+   * `xInstCount`/`xInst` APIs are more convenient to use, this API may be
+   * faster under some circumstances. To iterate through instances of phrase
+   * iPhrase, use the following code:
+   *
+   *     Fts5PhraseIter iter;
+   *     int iCol, iOff;
+   *     for(pApi->xPhraseFirst(pFts, iPhrase, &iter, &iCol, &iOff);
+   *         iCol>=0;
+   *         pApi->xPhraseNext(pFts, &iter, &iCol, &iOff)
+   *     ){
+   *       // An instance of phrase iPhrase at offset iOff of column iCol
+   *     }
+   *
+   * The `Fts5PhraseIter` structure is defined above. Applications should not
+   * modify this structure directly - it should only be used as shown above with
+   * the `xPhraseFirst()` and `xPhraseNext()` API methods (and by
+   * `xPhraseFirstColumn()` and `xPhraseNextColumn()` as illustrated below).
+   *
+   * This API can be quite slow if used with an FTS5 table created with the
+   * `"detail=none"` or `"detail=column"` option. If the FTS5 table is created
+   * with either `"detail=none"` or `"detail=column"` and `"content="` option
+   * (i.e. if it is a contentless table), then this API always iterates through
+   * an empty set (all calls to `xPhraseFirst()` set `iCol` to -1).
+   *
+   * Function resolves to:
+   *
+   *     $xPhraseFirst: (
+   *       fts5Ctx: WasmPointer,
+   *       iPhrase: number,
+   *       fts5PhraseIter: WasmPointer,
+   *       pCol: WasmPointer,
+   *       pOff: WasmPointer,
+   *     ) => number;
+   */
+  $xPhraseFirst: WasmPointer;
+
+  /**
+   * See {@link $xPhraseFirst}
+   *
+   * Function pointer resolve to:
+   *
+   *       $xPhraseNext: (
+   *         fts5Ctx: WasmPointer,
+   *         fts5PhraseIter: WasmPointer,
+   *         pCol: WasmPointer,
+   *         pOff: WasmPointer,
+   *       ) => void;
+   */
+  $xPhraseNext: WasmPointer;
+
+  /**
+   * This function and `xPhraseNextColumn()` are similar to the `xPhraseFirst()`
+   * and `xPhraseNext()` APIs described above. The difference is that instead of
+   * iterating through all instances of a phrase in the current row, these APIs
+   * are used to iterate through the set of columns in the current row that
+   * contain one or more instances of a specified phrase. For example:
+   *
+   *     Fts5PhraseIter iter;
+   *     int iCol;
+   *     for(pApi->xPhraseFirstColumn(pFts, iPhrase, &iter, &iCol);
+   *         iCol>=0;
+   *         pApi->xPhraseNextColumn(pFts, &iter, &iCol)
+   *     ){
+   *       // Column iCol contains at least one instance of phrase iPhrase
+   *     }
+   *
+   * This API can be quite slow if used with an FTS5 table created with the
+   * `"detail=none"` option. If the FTS5 table is created with either
+   * `"detail=none"` `"content="` option (i.e. if it is a contentless table),
+   * then this API always iterates through an empty set (all calls to
+   * `xPhraseFirstColumn()` set `iCol` to -1).
+   *
+   * The information accessed using this API and its companion
+   * `xPhraseFirstColumn()` may also be obtained using
+   * `xPhraseFirst`/`xPhraseNext` (or `xInst`/`xInstCount`). The chief advantage
+   * of this API is that it is significantly more efficient than those
+   * alternatives when used with `"detail=column"` tables.
+   *
+   * Function pointer resolves to:
+   *
+   *     $xPhraseFirstColumn: (
+   *       fts5Ctx: WasmPointer,
+   *       iPhrase: number,
+   *       fts5PhraseIter: WasmPointer,
+   *       pCol: WasmPointer,
+   *     ) => number;
+   */
+  $xPhraseFirstColumn: WasmPointer;
+
+  /**
+   * See {@link $xPhraseFirstColumn} Function pointer resolves to:
+   *
+   *       $xPhraseNextColumn: (
+   *         fts5Ctx: WasmPointer,
+   *         fts5PhraseIter: WasmPointer,
+   *         pCol: WasmPointer,
+   *       ) => void;
+   */
+  $xPhraseNextColumn: WasmPointer;
+}
+
+declare class Fts5Api extends SQLiteStruct {
+  $iVersion: number;
+
+  constructor(pointer?: WasmPointer);
+
+  /**
+   * The implementation is registered with the FTS5 module by calling the
+   * `xCreateTokenizer()` method of the `fts5_api` object. If there is already a
+   * tokenizer with the same name, it is replaced. If a non-NULL `xDestroy`
+   * parameter is passed to `xCreateTokenizer()`, it is invoked with a copy of
+   * the `pContext` pointer passed as the only argument when the database handle
+   * is closed or when the tokenizer is replaced.
+   *
+   * If successful, `xCreateTokenizer()` returns `SQLITE_OK`. Otherwise, it
+   * returns an SQLite error code. In this case the `xDestroy` function is not
+   * invoked.
+   *
+   * Function pointer resolves to:
+   *
+   *     $xCreateTokenizer: (
+   *       pApi: WasmPointer,
+   *       name: string,
+   *       ppContext: WasmPointer,
+   *       pTokenizer: WasmPointer,
+   *       xDestroy: WasmPointer,
+   *     ) => number;
+   */
+  $xCreateTokenizer: WasmPointer;
+
+  /**
+   * Find an existing tokenizer Function pointer resolves to:
+   *
+   *     $xFindTokenizer: (
+   *       pApi: WasmPointer,
+   *       name: string,
+   *       ppContext: WasmPointer,
+   *       pTokenizer: WasmPointer,
+   *     ) => number;
+   */
+  $xFindTokenizer: WasmPointer;
+
+  /**
+   * The implementation is registered with the FTS5 module by calling the
+   * `xCreateFunction()` method of the `fts5_api` object. If there is already an
+   * auxiliary function with the same name, it is replaced by the new function.
+   * If a non-NULL `xDestroy` parameter is passed to `xCreateFunction()`, it is
+   * invoked with a copy of the `pContext` pointer passed as the only argument
+   * when the database handle is closed or when the registered auxiliary
+   * function is replaced.
+   *
+   * If successful, `xCreateFunction()` returns `SQLITE_OK`. Otherwise, it
+   * returns an SQLite error code. In this case the `xDestroy` function is not
+   * invoked.
+   *
+   * Function pointer resolves to:
+   *
+   *     $xCreateFunction: (
+   *       pApi: WasmPointer,
+   *       name: string,
+   *       pContext: WasmPointer,
+   *       xFunction: (
+   *         pApi: WasmPointer,
+   *         pFts: WasmPointer,
+   *         pCtx: WasmPointer,
+   *         nVal: number,
+   *         apVal: SqlValue[],
+   *       ) => void,
+   *       xDestroy: (pContext: WasmPointer) => void,
+   *     ) => number;
+   */
+  $xCreateFunction: WasmPointer;
+}
+
+declare class Fts5Tokenizer extends SQLiteStruct {
+  constructor(pointer?: WasmPointer);
+
+  /**
+   * This function is used to allocate and initialize a tokenizer instance. A
+   * tokenizer instance is required to actually tokenize text.
+   *
+   * The first argument passed to this function is a copy of the `(void*)`
+   * pointer provided by the application when the `fts5_tokenizer` object was
+   * registered with FTS5 (the third argument to `xCreateTokenizer()`). The
+   * second and third arguments are an array of nul-terminated strings
+   * containing the tokenizer arguments, if any, specified following the
+   * tokenizer name as part of the `CREATE VIRTUAL TABLE` statement used to
+   * create the FTS5 table.
+   *
+   * The final argument is an output variable. If successful, `(*ppOut)` should
+   * be set to point to the new tokenizer handle and `SQLITE_OK` returned. If an
+   * error occurs, some value other than SQLITE_OK should be returned. In this
+   * case, fts5 assumes that the final value of `*ppOut` is `undefined`.
+   *
+   * Function pointe resolves to:
+   *
+   *     $xCreate: (
+   *       pContext: WasmPointer,
+   *       args: WasmPointer,
+   *       nArg: number,
+   *       ppOut: WasmPointer,
+   *     ) => number;
+   */
+  $xCreate: WasmPointer;
+
+  /**
+   * This function is invoked to delete a tokenizer handle previously allocated
+   * using `xCreate()`. Fts5 guarantees that this function will be invoked
+   * exactly once for each successful call to `xCreate()`. Function pointer
+   * resolves to:
+   *
+   *     $xDelete: (pTokenizer: WasmPointer) => void;
+   */
+  $xDelete: WasmPointer;
+
+  /**
+   * This function is expected to tokenize the `nText` byte string indicated by
+   * argument `pText`. `pText` may or may not be nul-terminated. The first
+   * argument passed to this function is a pointer to an `Fts5Tokenizer` object
+   * returned by an earlier call to `xCreate()`.
+   *
+   * The second argument indicates the reason that FTS5 is requesting
+   * tokenization of the supplied text. This is always one of the following four
+   * values:
+   *
+   * - `FTS5_TOKENIZE_DOCUMENT` - A document is being inserted into or removed
+   *   from the FTS table. The tokenizer is being invoked to determine the set
+   *   of tokens to add to (or delete from) the FTS index.
+   * - `FTS5_TOKENIZE_QUERY` - A `MATCH` query is being executed against the FTS
+   *   index. The tokenizer is being called to tokenize a bareword or quoted
+   *   string specified as part of the query.
+   * - `(FTS5_TOKENIZE_QUERY | FTS5_TOKENIZE_PREFIX)` - Same as
+   *   `FTS5_TOKENIZE_QUERY`, except that the bareword or quoted string is
+   *   followed by a `"*"` character, indicating that the last token returned by
+   *   the tokenizer will be treated as a token prefix.
+   * - `FTS5_TOKENIZE_AUX` - The tokenizer is being invoked to satisfy an
+   *   `fts5_api.xTokenize()` request made by an auxiliary function. Or an
+   *   `fts5_api.xColumnSize()` request made by the same on a `columnsize=0`
+   *   database.
+   *
+   * For each token in the input string, the supplied callback `xToken()` must
+   * be invoked. The first argument to it should be a copy of the pointer passed
+   * as the second argument to `xTokenize()`. The third and fourth arguments are
+   * a pointer to a buffer containing the token text, and the size of the token
+   * in bytes. The 4th and 5th arguments are the byte offsets of the first byte
+   * of and first byte immediately following the text from which the token is
+   * derived within the input.
+   *
+   * The second argument passed to the `xToken()` callback (`"tflags"`) should
+   * normally be set to 0. The exception is if the tokenizer supports synonyms.
+   * In this case see the discussion below for details.
+   *
+   * FTS5 assumes the `xToken()` callback is invoked for each token in the order
+   * that they occur within the input text.
+   *
+   * If an `xToken()` callback returns any value other than `SQLITE_OK`, then
+   * the tokenization should be abandoned and the `xTokenize()` method should
+   * immediately return a copy of the `xToken()` return value. Or, if the input
+   * buffer is exhausted, `xTokenize()` should return SQLITE_OK. Finally, if an
+   * error occurs with the `xTokenize()` implementation itself, it may abandon
+   * the tokenization and return any error code other than `SQLITE_OK` or
+   * `SQLITE_DONE`.
+   *
+   * Function pointer resolves to:
+   *
+   *     $xTokenize: (
+   *       pTokenizer: WasmPointer,
+   *       pCtx: WasmPointer,
+   *       flags: number,
+   *       text: string,
+   *       nText: number,
+   *       tokenCb: (
+   *         pCtx: WasmPointer,
+   *         tflags: number,
+   *         token: string,
+   *         nToken: number,
+   *         iStart: number,
+   *         iEnd: number,
+   *       ) => number,
+   *     ) => number;
+   */
+  $xTokenize: WasmPointer;
+}
+
 declare type Sqlite3Static = {
   /** The namespace for the C-style APIs. */
   capi: CAPI;
@@ -2161,6 +2718,125 @@ declare type Sqlite3Static = {
        */
       iVersion?: number;
     };
+  };
+
+  /** Namespace to assist in JavaScript-side extension of FTS5. */
+  fts5: {
+    Fts5ExtensionApi: typeof Fts5ExtensionApi;
+    Fts5PhraseIter: unknown;
+    fts5_api: typeof Fts5Api;
+    fts5_api_from_db: unknown;
+    fts5_tokenizer: unknown;
+
+    /**
+     * Requires a JS Function intended to be used as an `xFunction()`
+     * implementation. This function returns a proxy `xFunction` wrapper which:
+     *
+     * - Converts all of its `sqlite3_value` arguments to an array of JS values
+     *   using `sqlite3_values_to_js()`.
+     * - Calls the given callback, passing it:
+     *
+     *   (pFtsXApi, pFtsCx, pCtx, array-of-values)
+     *
+     * Where the first 3 arguments are the first 3 pointers in the `xFunction`
+     * interface.
+     *
+     * The call is intended to set a result value into the db, and may do so be
+     * either (A) explicitly returning non-undefined or (B) using one of the
+     * `sqlite3_result_XYZ()` functions and returning `undefined`. If the
+     * callback throws, its exception will be passed to
+     * `sqlite3_result_error_js()`.
+     */
+    xFunctionProxy1: (
+      callback: (
+        pFtsXApi: WasmPointer,
+        pFtsCx: WasmPointer,
+        pCtx: WasmPointer,
+        args: SqlValue[],
+      ) => SqlValue,
+    ) => (pFtsXApi, pFtsCx, argc, pArgv) => void;
+
+    /**
+     * Identical to {@link xFunctionProxy1} except that the callback wrapper it
+     * creates does _not_ perform sqlite3_value-to-JS conversion in advance and
+     * calls the callback with:
+     *
+     *      (pFtsXApi, pFtsCx, pCtx, array-of-ptr-to-sqlite3_value)
+     *
+     *      It is up to the callback to use the sqlite3_value_XYZ() family of
+     *      functions to inspect or convert the values.
+     */
+    xFunctionProxy2: (
+      callback: (
+        pFtsXApi: unknown,
+        pFtsCx: unknown,
+        pCtx: unknown,
+        args: number[],
+      ) => SqlValue,
+    ) => (
+      pFtsXApi: unknown,
+      pFtsCx: unknown,
+      argc: number,
+      pArgv: number[],
+    ) => void;
+
+    /**
+     * Convenience wrapper to fts5_api::xCreateFunction.
+     *
+     * Creates a new FTS5 function for the given database. The arguments are:
+     *
+     * - `db` must be either an `sqlite3.oo1.DB` instance or a WASM pointer to
+     *   `(sqlite3*)`.
+     * - `name`: name (JS string) of the function
+     * - `xFunction` either a `Function` or a pointer to a WASM function. In the
+     *   former case a WASM-bound wrapper, behaving as documented for
+     *   `fts5.xFunctionProxy1()`, gets installed for the life of the given db
+     *   handle. In the latter case the function is passed-through as-is, with
+     *   no argument conversion or lifetime tracking. In the former case the
+     *   function is called as documented for `xFunctionProxy1()` and in the
+     *   latter it must return `void` and is called with args
+     *   `(ptrToFts5ExtensionApi, ptrToFts5Context, ptrToSqlite3Context, int
+     *   argc, C-array-of-sqlite3_value-pointers)`.
+     * - `xDestroy` optional `Function` or pointer to WASM function to call when
+     *   the binding is destroyed (when the db handle is closed). The function
+     *   will, in this context, always be passed 0 as its only argument. A
+     *   passed-in function must, however, have one parameter so that type
+     *   signature checks will pass. It must return void and must not throw.
+     *
+     * The 2nd and subsequent aruguments may optionally be packed into a single
+     * Object with like-named properties.
+     *
+     * This function throws on error, of which there are many potential
+     * candidates. It returns `undefined`.
+     */
+    createFunction(
+      db: Database | WasmPointer,
+      name: string,
+      xFunction:
+        | ((
+            pFtsXApi: WasmPointer,
+            pFtsCx: WasmPointer,
+            pCtx: WasmPointer,
+            args: SqlValue[],
+          ) => SqlValue | void)
+        | WasmPointer,
+      xDestroy?: ((never: 0) => void) | WasmPointer,
+    ): undefined;
+    createFunction(
+      db: Database | WasmPointer,
+      options: {
+        name: string;
+        xFunction:
+          | ((
+              pFtsXApi: WasmPointer,
+              pFtsCx: WasmPointer,
+              pCtx: WasmPointer,
+              args: SqlValue[],
+            ) => SqlValue | void)
+          | WasmPointer;
+        xDestroy?: ((never: 0) => void) | WasmPointer;
+      },
+    ): undefined;
   };
 };
 
