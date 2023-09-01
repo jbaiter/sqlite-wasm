@@ -1,6 +1,6 @@
 {
   "name": "@jbaiter/sqlite-wasm",
-  "version": "3.43.0-build4-with-fts5",
+  "version": "3.43.0-build5-with-fts5",
   "description": "SQLite Wasm conveniently wrapped as an ES Module.",
   "keywords": [
     "sqlite",
@@ -31,7 +31,8 @@
       "types": "./index.d.ts"
     },
     "./src/comlink.mjs": "./src/comlink.mjs",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./sqlite-wasm/jswasm/sqlite3.wasm": "./sqlite-wasm/jswasm/sqlite3.wasm"
   },
   "types": "./index.d.ts",
   "bin": {
